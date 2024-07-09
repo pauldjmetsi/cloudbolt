@@ -2,7 +2,29 @@
     "any_group_can_deploy": true,
     "auto_historical_resources": false,
     "blueprint_image": "/static/uploads/blueprints/elastic-stack-logo-png-transparent_CkrrRWo.png",
-    "deployment_items": [],
+    "deployment_items": [
+        {
+            "all_environments_enabled": false,
+            "allowed_os_families": [
+                "Ubuntu"
+            ],
+            "applications": null,
+            "deploy_seq": 1,
+            "description": "",
+            "environment_selection_orchestration": null,
+            "execute_in_parallel": false,
+            "hostname_template": "",
+            "id": "BDI-nupxgbuh",
+            "name": "ubuntu-20-template-0724",
+            "os_build": {
+                "href": "/api/v3/cmp/osBuilds/OSB-lh0fg2qv/",
+                "title": "ubuntu-20-template-0724"
+            },
+            "restrict_applications": false,
+            "show_on_order_form": false,
+            "tier_type": "server"
+        }
+    ],
     "description": "",
     "favorited": false,
     "icon": "elastic-stack-logo-png-transparent_CkrrRWo.png",
