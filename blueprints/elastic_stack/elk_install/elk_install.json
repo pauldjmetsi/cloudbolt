@@ -1,8 +1,12 @@
 {
     "commandline_args": null,
-    "credentials": "YOUR_CREDENTIALS",
+    "credentials": {
+        "username": "metsi"
+    },
     "description": "Installs Elastic Stack",
+    "environments": [],
     "execution_timeout": 3600,
+    "groups": [],
     "id": "OHK-i98ezb7b",
     "last_updated": "2024-07-10",
     "max_retries": 0,
@@ -11,8 +15,9 @@
     "name": "ELK Install",
     "remove_after_run": true,
     "resource_technologies": [],
+    "run_on_server": "The server(s) in context",
     "run_with_sudo": false,
-    "script_filename": "remote_script_E7OwWWp",
+    "script_filename": "remote_script_E7OwWWp_iBgEtPh",
     "shared": false,
     "target_os_families": [
         "Linux -> Ubuntu"

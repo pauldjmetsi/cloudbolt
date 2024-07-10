@@ -1,5 +1,7 @@
 {
     "description": "",
+    "environments": [],
+    "groups": [],
     "id": "OHK-ufvigwux",
     "last_updated": "2024-07-10",
     "max_retries": 0,
@@ -7,7 +9,7 @@
     "minimum_version_required": "8.6",
     "name": "ELK Prereqs Code",
     "resource_technologies": [],
-    "script_filename": "cb_plugin_1720165168376979_wcVf7Ih.py",
+    "script_filename": "cb_plugin_1720165168376979_wcVf7Ih_1za4hBF.py",
     "shared": false,
     "target_os_families": [],
     "type": "CloudBolt Plug-in"

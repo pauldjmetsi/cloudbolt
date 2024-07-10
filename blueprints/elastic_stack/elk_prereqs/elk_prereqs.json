@@ -1,8 +1,12 @@
 {
     "commandline_args": null,
-    "credentials": "YOUR_CREDENTIALS",
+    "credentials": {
+        "username": "metsi"
+    },
     "description": "",
+    "environments": [],
     "execution_timeout": 3600,
+    "groups": [],
     "id": "OHK-vtvgdlnt",
     "last_updated": "2024-07-10",
     "max_retries": 0,
@@ -11,8 +15,9 @@
     "name": "ELK - Prereqs",
     "remove_after_run": true,
     "resource_technologies": [],
+    "run_on_server": "The server(s) in context",
     "run_with_sudo": false,
-    "script_filename": "remote_script_LqfoKJD",
+    "script_filename": "remote_script_LqfoKJD_MHNoi90",
     "shared": false,
     "target_os_families": [
         "Linux -> Ubuntu"
