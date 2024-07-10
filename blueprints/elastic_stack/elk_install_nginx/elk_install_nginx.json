@@ -1,0 +1,21 @@
+{
+    "commandline_args": null,
+    "credentials": "YOUR_CREDENTIALS",
+    "description": "",
+    "execution_timeout": 3600,
+    "id": "OHK-duy3f19n",
+    "last_updated": "2024-07-10",
+    "max_retries": 0,
+    "maximum_version_required": "",
+    "minimum_version_required": "8.6",
+    "name": "ELK - Install Nginx",
+    "remove_after_run": true,
+    "resource_technologies": [],
+    "run_with_sudo": false,
+    "script_filename": "remote_script_x436Ioq",
+    "shared": false,
+    "target_os_families": [
+        "Linux -> Ubuntu"
+    ],
+    "type": "Remote Script"
+}

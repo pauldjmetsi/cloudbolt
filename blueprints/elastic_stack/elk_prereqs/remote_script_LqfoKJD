@@ -1,0 +1,47 @@
+#!/bin/bash
+## Elastic Stack Prerequisites Install
+
+###################
+## Set variables ##
+###################
+ELASTIC_IP=$(ip -o -4 addr list ens160 | awk '{print $4}' | cut -d/ -f1)
+ELASTIC_VM_NAME=$HOSTNAME
+ELASTIC_DNS_NAME=elk.metsilabs.local
+
+# Function to check and remove locks
+remove_locks() {
+    echo Mets1Tech | sudo -S rm -f /var/lib/dpkg/lock-frontend
+    sudo rm -f /var/lib/dpkg/lock
+    sudo dpkg --configure -a
+}
+
+
+###################
+## Prerequisites ##
+###################
+
+# Remove any existing locks
+remove_locks
+
+echo "INFO: Installing apt-transport-https" 
+# Add apt-transport-https fot securing software install 
+# echo Mets1Tech | sudo -S apt-get install apt-transport-https
+sudo apt-get install apt-transport-https
+
+echo "INFO: Getting GPG key and repo for ELK"
+# Add the GPG key and repository of the Elastic stack 
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+
+echo "INFO: Adding host entries to hosts file"
+# Add hostname and internal IP to hosts file 
+sudo -- sh -c "echo $ELASTIC_IP $ELASTIC_VM_NAME >> /etc/hosts"
+sudo -- sh -c "echo $ELASTIC_IP $ELASTIC_DNS_NAME >> /etc/hosts"
+
+echo "INFO: Installing dialog apt-utils"
+# Install dialog apt-utils
+sudo apt-get install dialog apt-utils -y
+
+echo "INFO: Updating Ubuntu"
+# Update Ubuntu 
+sudo apt-get update

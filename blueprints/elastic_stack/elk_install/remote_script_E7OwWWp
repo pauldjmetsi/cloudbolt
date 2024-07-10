@@ -1,0 +1,190 @@
+#!/bin/bash
+## Elastic Stack Prerequisites Install
+
+###################
+## Set variables ##
+###################
+ELASTIC_IP=$(ip -o -4 addr list ens160 | awk '{print $4}' | cut -d/ -f1)
+ELASTIC_VM_NAME=$HOSTNAME
+ELASTIC_DNS_NAME=elk.metsilabs.local
+KIBANA_USER=metsi
+KIBANA_USER_PASSWORD=Mets1Tech
+
+# Function to check and remove locks
+remove_locks() {
+    echo Mets1Tech | sudo -S rm -f /var/lib/dpkg/lock-frontend
+    sudo rm -f /var/lib/dpkg/lock
+    sudo dpkg --configure -a
+}
+
+
+###################
+## Prerequisites ##
+###################
+
+# Remove any existing locks
+remove_locks
+
+echo "INFO: Installing apt-transport-https" 
+# Add apt-transport-https fot securing software install 
+# echo Mets1Tech | sudo -S apt-get install apt-transport-https
+sudo apt-get install apt-transport-https
+
+echo "INFO: Getting GPG key and repo for ELK"
+# Add the GPG key and repository of the Elastic stack 
+wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list
+
+echo "INFO: Adding host entries to hosts file"
+# Add hostname and internal IP to hosts file 
+sudo -- sh -c "echo $ELASTIC_IP $ELASTIC_VM_NAME >> /etc/hosts"
+sudo -- sh -c "echo $ELASTIC_IP $ELASTIC_DNS_NAME >> /etc/hosts"
+
+echo "INFO: Installing dialog apt-utils"
+# Install dialog apt-utils
+sudo apt-get install dialog apt-utils -y
+
+echo "INFO: Updating Ubuntu"
+# Update Ubuntu 
+sudo apt-get update
+
+
+########################################
+## Install and configure Elaticsearch ##
+########################################
+
+echo "INFO: Installing Elasticsearch"
+# Install Elaticsearch
+sudo apt-get install elasticsearch
+
+echo "INFO: Updating elasticsearch.yml"
+# Update elasticsearch.yml
+sudo sed -i -e "s/#node.name: node-1/node.name: ${ELASTIC_VM_NAME}/g" /etc/elasticsearch/elasticsearch.yml
+sudo sed -i -e "s/#network.host: 192.168.0.1/network.host: ${ELASTIC_IP}/g" /etc/elasticsearch/elasticsearch.yml
+sudo sed -i -e 's/#http.port: 9200/http.port: 9200/g' /etc/elasticsearch/elasticsearch.yml
+sudo sed -i -e "s/#cluster\.initial_master_nodes: \[\"node-1\", \"node-2\"\]/cluster.initial_master_nodes: \[\"${ELASTIC_VM_NAME}\"\]/g" /etc/elasticsearch/elasticsearch.yml
+
+# enable Elastic security by adding the following 
+sudo -- sh -c "echo xpack.security.enabled: true >> /etc/elasticsearch/elasticsearch.yml"
+
+echo "INFO: Reloading server manager"
+# Reload systemd service manager
+sudo systemctl daemon-reload
+
+echo "INFO: Starting Elasticsearch"
+# Start elasticsearch service and add to system boot
+sudo systemctl start elasticsearch
+sudo systemctl enable elasticsearch 
+
+echo "INFO: Creating passwords for Elasticsearch users"
+# Generate password for the built-in users on Elasticsearch 
+yes | sudo  /usr/share/elasticsearch/bin/elasticsearch-setup-passwords auto -u "http://${ELASTIC_IP}:9200" > elastic_passwords.txt
+
+echo "INFO: Saving password to file"
+# Save password as variables
+PASSWORD_ELASTIC=$(grep "PASSWORD elastic = " elastic_passwords.txt | awk -F'= ' '{print $2}')
+PASSWORD_KIBANA_SYSTEM=$(grep "PASSWORD kibana_system = " elastic_passwords.txt | awk -F'= ' '{print $2}')
+PASSWORD_KIBANA=$(grep "PASSWORD kibana = " elastic_passwords.txt | awk -F'= ' '{print $2}')
+
+echo "INFO: PASSWORD_ELASTIC = $PASSWORD_ELASTIC"
+echo "INFO: PASSWORD_KIBANA_SYSTEM = $PASSWORD_KIBANA_SYSTEM"
+echo "INFO: PASSWORD_KIBANA = $PASSWORD_KIBANA"
+
+echo "INFO: Testing Elasticsearch"
+# Test Elasticsearch installation 
+curl -X GET -u elastic:$PASSWORD_ELASTIC "http://${ELASTIC_IP}:9200/?pretty"
+
+
+##################################
+## Install and configure Kibana ##
+##################################
+
+echo "INFO: Installing Kibana"
+# Install Kibana
+sudo apt-get install kibana
+
+echo "INFO: Updating kibana.yaml"
+# Edit kibana.yaml file 
+sudo sed -i -e 's/#server.port: 5601/server.port: 5601/g' /etc/kibana/kibana.yml
+sudo sed -i -e "s/#server.host: \"localhost\"/server.host: \"${ELASTIC_IP}\"/g" /etc/kibana/kibana.yml
+sudo sed -i -e "s/#server.name: \"your-hostname\"/server.name: \"${ELASTIC_VM_NAME}\"/g" /etc/kibana/kibana.yml
+sudo sed -i -e 's/#server.publicBaseUrl: ""/server.publicBaseUrl: ""/g' /etc/kibana/kibana.yml
+sudo sed -i -e "s|#elasticsearch\.hosts: \[\"http://localhost:9200\"\]|elasticsearch.hosts: [\"http://${ELASTIC_IP}:9200\"]|g" /etc/kibana/kibana.yml
+sudo sed -i -e 's/server.publicBaseUrl: ""/#server.publicBaseUrl: ""/g' /etc/kibana/kibana.yml
+
+# uncomment elasticsearch.password. Get password from set password command. 
+sudo sed -i -e 's/#elasticsearch.username: "kibana_system"/elasticsearch.username: "kibana_system"/g' /etc/kibana/kibana.yml
+sudo sed -i -e "s/#elasticsearch.password: \"pass\"/elasticsearch.password: \"${PASSWORD_KIBANA_SYSTEM}\"/g" /etc/kibana/kibana.yml
+
+echo "INFO: Reloading daemon"
+# Reload system 
+sudo systemctl daemon-reload
+
+echo "INFO: Starting Kibana services"
+# Start Kibana service and add to system boot
+sudo systemctl start kibana
+sudo systemctl enable kibana
+
+#############################################
+## Setup Nginx as reverse proxy for Kibana ##
+#############################################
+
+echo "INFO: Installing nginx"
+# Install nginx 
+sudo apt-get install nginx -y
+
+echo "INFO: Creating new virtual hosts file"
+# Create a new virtual hosts file 'kibana' 
+sudo tee /etc/nginx/sites-available/kibana > /dev/null << EOF
+server {
+    listen 80;
+ 
+    server_name ${ELASTIC_DNS_NAME};
+ 
+    location / {
+        proxy_pass http://${ELASTIC_IP}:5601;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host \$host;
+        proxy_cache_bypass \$http_upgrade;
+    }
+}
+EOF
+
+echo "INFO: Activate nginx virtual host for Kibana"
+# Active Ngnix virtual host for Kibana 
+sudo ln -s /etc/nginx/sites-available/kibana /etc/nginx/sites-enabled/
+
+echo "INFO: Verify nginx"
+# Verify Ngnix config 
+sudo nginx -t
+
+echo "INFO: Restart nginx service"
+# Restart Ngnix service 
+sudo systemctl restart nginx
+
+sleep 30
+
+echo "INFO: Creating new Kibana user"
+# Create new Kibana user 
+curl -X POST -u elastic:$PASSWORD_ELASTIC "http://${ELASTIC_IP}:9200/_security/user/${KIBANA_USER}?pretty" -H 'Content-Type: application/json' -d "
+{
+  \"password\" : \"${KIBANA_USER_PASSWORD}\",
+  \"roles\" : [ \"kibana_admin\" ]
+}"
+
+echo "INFO: Create new index pattern filebeat"
+# Add VM details to the hosts file
+sudo -- sh -c "echo $ELASTIC_IP $ELASTIC_DNS_NAME >> /etc/hosts"
+
+# API call to create a new index pattern named 'filebeat-*'
+sudo curl -X POST -u ${KIBANA_USER}:${KIBANA_USER_PASSWORD} "http://${ELASTIC_DNS_NAME}/api/saved_objects/index-pattern" -H 'Kbn-Version: 7.17.22' -H 'Content-Type: application/json' -d'
+{
+  "attributes": {
+    "title": "filebeat-*",
+    "timeFieldName": "@timestamp"
+  }
+}'
+
+echo "INFO: Elastic Stack URL: http://${ELASTIC_IP}:5601"

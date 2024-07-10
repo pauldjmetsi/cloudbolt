@@ -1,0 +1,24 @@
+#!/bin/bash
+## Elastic Stack configure index pattern for filebeat
+
+###################
+## Set variables ##
+###################
+ELASTIC_IP=$(ip -o -4 addr list ens160 | awk '{print $4}' | cut -d/ -f1)
+ELASTIC_DNS_NAME=elk.metsilabs.local
+KIBANA_USER=metsi
+KIBANA_USER_PASSWORD=Mets1Tech
+
+############################################################
+## API call to create a new index pattern named 'filebeat ##
+############################################################
+echo "INFO: Create new index pattern filebeat"
+sudo curl -X POST -u ${KIBANA_USER}:${KIBANA_USER_PASSWORD} "http://${ELASTIC_DNS_NAME}/api/saved_objects/index-pattern" -H 'Kbn-Version: 7.17.22' -H 'Content-Type: application/json' -d'
+{
+  "attributes": {
+    "title": "filebeat-*",
+    "timeFieldName": "@timestamp"
+  }
+}'
+
+echo "INFO: Elastic Stack URL: http://${ELASTIC_IP}:5601"
