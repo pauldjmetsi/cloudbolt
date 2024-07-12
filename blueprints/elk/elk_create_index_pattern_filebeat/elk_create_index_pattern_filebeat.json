@@ -1,0 +1,26 @@
+{
+    "commandline_args": null,
+    "credentials": {
+        "username": "metsi"
+    },
+    "description": "",
+    "environments": [],
+    "execution_timeout": 3600,
+    "groups": [],
+    "id": "OHK-extp9gf0",
+    "last_updated": "2024-07-12",
+    "max_retries": 0,
+    "maximum_version_required": "",
+    "minimum_version_required": "8.6",
+    "name": "ELK - Create Index Pattern Filebeat",
+    "remove_after_run": true,
+    "resource_technologies": [],
+    "run_on_server": "The server(s) in context",
+    "run_with_sudo": false,
+    "script_filename": "remote_script_j2i3Rvt_PvrPrqH_TofBrjX",
+    "shared": true,
+    "target_os_families": [
+        "Linux -> Ubuntu"
+    ],
+    "type": "Remote Script"
+}

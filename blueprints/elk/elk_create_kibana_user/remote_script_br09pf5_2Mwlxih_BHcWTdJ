@@ -1,0 +1,23 @@
+#!/bin/bash
+## Elastic Stack Prerequisites Install
+
+###################
+## Set variables ##
+###################
+ELASTIC_IP=$(ip -o -4 addr list ens160 | awk '{print $4}' | cut -d/ -f1)
+KIBANA_USER=metsi
+KIBANA_USER_PASSWORD=Mets1Tech
+PASSWORD_ELASTIC=$(grep "PASSWORD elastic = " elastic_passwords.txt | awk -F'= ' '{print $2}')
+
+
+#############################
+## Create new Kibana user ##
+#############################
+
+echo "INFO: Creating new Kibana user"
+# Create new Kibana user 
+curl -X POST -u elastic:$PASSWORD_ELASTIC "http://${ELASTIC_IP}:9200/_security/user/${KIBANA_USER}?pretty" -H 'Content-Type: application/json' -d "
+{
+  \"password\" : \"${KIBANA_USER_PASSWORD}\",
+  \"roles\" : [ \"kibana_admin\" ]
+}"
