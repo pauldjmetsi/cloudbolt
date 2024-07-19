@@ -251,6 +251,20 @@
             "run_on_scale_up": true,
             "show_on_order_form": false,
             "tier_type": "script"
+        },
+        {
+            "action_name": "Set URL",
+            "continue_on_failure": false,
+            "deploy_seq": 10,
+            "description": null,
+            "enabled": true,
+            "enabled_environments": [],
+            "execute_in_parallel": false,
+            "id": "BDI-jlthumlw",
+            "name": "Set URL",
+            "run_on_scale_up": true,
+            "show_on_order_form": false,
+            "tier_type": "plugin"
         }
     ],
     "description": "Elastic Stack",
@@ -272,7 +286,7 @@
     "is_manageable": true,
     "is_orderable": true,
     "labels": [],
-    "last_updated": "2024-07-12",
+    "last_updated": "2024-07-19",
     "management_actions": [],
     "maximum_version_required": "",
     "minimum_version_required": "8.6",
@@ -324,12 +338,12 @@
     "resource_name_template": null,
     "resource_type": {
         "icon": "",
-        "id": "RT-so0zb2a6",
-        "label": "Service",
+        "id": "RT-l8hkf5px",
+        "label": "Elastic Stack Instance",
         "lifecycle": "ACTIVE",
         "list_view_columns": [],
-        "name": "service",
-        "plural_label": null
+        "name": "elastic_stack_instance",
+        "plural_label": "Elastic Stack Instances"
     },
     "sequence": 0,
     "show_recipient_field_on_order_form": false,

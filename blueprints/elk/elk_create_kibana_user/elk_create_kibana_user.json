@@ -8,7 +8,7 @@
     "execution_timeout": 3600,
     "groups": [],
     "id": "OHK-6w9ax4kb",
-    "last_updated": "2024-07-12",
+    "last_updated": "2024-07-19",
     "max_retries": 0,
     "maximum_version_required": "",
     "minimum_version_required": "8.6",
@@ -17,7 +17,7 @@
     "resource_technologies": [],
     "run_on_server": "The server(s) in context",
     "run_with_sudo": false,
-    "script_filename": "remote_script_br09pf5_2Mwlxih_BHcWTdJ",
+    "script_filename": "remote_script_br09pf5_2Mwlxih_BHcWTdJ_tUqzgtC",
     "shared": true,
     "target_os_families": [
         "Linux -> Ubuntu"
